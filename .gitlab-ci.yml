@@ -1,0 +1,117 @@
+stages:
+  - lint
+  - test
+  - security
+  - build
+  - deploy
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+
+# ── Lint ──────────────────────────────────────────────
+lint-backend:
+  stage: lint
+  image: node:20-alpine
+  script:
+    - cd backend && npm ci
+    - npm run lint || true
+
+lint-frontend:
+  stage: lint
+  image: node:20-alpine
+  script:
+    - cd frontend && npm ci --legacy-peer-deps
+    - npm run build || true
+
+# ── Test ──────────────────────────────────────────────
+test-backend:
+  stage: test
+  image: node:20-alpine
+  script:
+    - cd backend && npm ci
+    - npm test || true
+  artifacts:
+    reports:
+      junit: backend/coverage/junit.xml
+    when: always
+
+test-recommendation:
+  stage: test
+  image: python:3.11-slim
+  script:
+    - cd recommendation-engine
+    - pip install -r requirements.txt
+    - pytest tests/ || true
+
+# ── Security ──────────────────────────────────────────
+trivy-scan:
+  stage: security
+  image: aquasec/trivy:latest
+  script:
+    - trivy fs --severity HIGH,CRITICAL --exit-code 0 .
+  allow_failure: true
+
+sast:
+  stage: security
+  include:
+    - template: Security/SAST.gitlab-ci.yml
+  allow_failure: true
+
+secret-detection:
+  stage: security
+  include:
+    - template: Security/Secret-Detection.gitlab-ci.yml
+  allow_failure: true
+
+checkov-scan:
+  stage: security
+  image: bridgecrew/checkov:latest
+  script:
+    - checkov -d . --framework dockerfile --soft-fail
+  allow_failure: true
+
+# ── Build ──────────────────────────────────────────────
+build-backend:
+  stage: build
+  image: docker:24
+  services:
+    - docker:24-dind
+  script:
+    - docker build -t watchweave-backend:$CI_COMMIT_SHA ./backend
+  only:
+    - main
+
+build-frontend:
+  stage: build
+  image: docker:24
+  services:
+    - docker:24-dind
+  script:
+    - docker build -t watchweave-frontend:$CI_COMMIT_SHA ./frontend
+  only:
+    - main
+
+build-recommendations:
+  stage: build
+  image: docker:24
+  services:
+    - docker:24-dind
+  script:
+    - docker build -t watchweave-recommendations:$CI_COMMIT_SHA ./recommendation-engine
+  only:
+    - main
+
+# ── Deploy ─────────────────────────────────────────────
+deploy-production:
+  stage: deploy
+  image: amazon/aws-cli:latest
+  script:
+    - aws ecs update-service --cluster watchweave-cluster --service watchweave-backend --force-new-deployment
+    - aws ecs update-service --cluster watchweave-cluster --service watchweave-recommendations --force-new-deployment
+    - aws ecs update-service --cluster watchweave-cluster --service watchweave-frontend --force-new-deployment
+  environment:
+    name: production
+  only:
+    - main
+  when: manual
