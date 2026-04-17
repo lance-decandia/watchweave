@@ -35,7 +35,7 @@ const Recommendations: React.FC = () => {
         ) : (
           <Grid container spacing={3}>
             {recommendations.map((anime) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={anime.mal_id}>
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={anime.mal_id}>
                 <Card>
                   <CardMedia component="img" height="250"
                     image={anime.images?.jpg?.image_url} alt={anime.title} />

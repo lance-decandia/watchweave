@@ -48,7 +48,7 @@ const Watchlist: React.FC = () => {
         ) : (
           <Grid container spacing={3}>
             {watchlist.map((entry) => (
-              <Grid item xs={12} sm={6} md={4} key={entry.id}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={entry.id}>
                 <Card sx={{ display: 'flex' }}>
                   <CardMedia component="img" sx={{ width: 100 }}
                     image={entry.anime_image} alt={entry.anime_title} />

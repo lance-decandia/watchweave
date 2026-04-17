@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Container, Box, TextField, Button, Grid, Card, CardMedia, 
+import { Container, Box, TextField, Button, Grid, Card, CardMedia,
   CardContent, Typography, CardActions, Chip } from '@mui/material';
 import { animeService, watchlistService } from '../services/api';
 import { Anime } from '../types';
@@ -54,7 +54,7 @@ const Search: React.FC = () => {
         </Box>
         <Grid container spacing={3}>
           {results.map((anime) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={anime.mal_id}>
+            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={anime.mal_id}>
               <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <CardMedia component="img" height="250"
                   image={anime.images.jpg.image_url} alt={anime.title} />
