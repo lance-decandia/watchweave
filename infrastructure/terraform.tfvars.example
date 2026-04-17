@@ -1,0 +1,4 @@
+aws_region   = "us-east-1"
+project_name = "watchweave"
+db_password  = "your-secure-password"
+jwt_secret   = "your-super-secret-jwt-key"
