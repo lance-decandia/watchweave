@@ -14,7 +14,6 @@ jobs:
   lint-and-test-backend:
     name: Lint & Test Backend
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -32,12 +31,11 @@ jobs:
         run: cd backend && npm run lint || true
 
       - name: Run tests
-        run: cd backend && npm test || true
+        run: cd backend && npm test
 
   lint-and-test-recommendation:
     name: Lint & Test Recommendation Engine
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -50,7 +48,7 @@ jobs:
         run: cd recommendation-engine && pip install -r requirements.txt
 
       - name: Run Pytest
-        run: cd recommendation-engine && pytest tests/ || true
+        run: cd recommendation-engine && pytest tests/ -v
 
   security-scan-trivy:
     name: Trivy Security Scan
@@ -71,7 +69,6 @@ jobs:
   security-scan-snyk:
     name: Snyk Security Scan
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
