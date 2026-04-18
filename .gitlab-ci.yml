@@ -9,7 +9,6 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: "/certs"
 
-# ── Lint ──────────────────────────────────────────────
 lint-backend:
   stage: lint
   image: node:20-alpine
@@ -24,7 +23,6 @@ lint-frontend:
     - cd frontend && npm ci --legacy-peer-deps
     - npm run build || true
 
-# ── Test ──────────────────────────────────────────────
 test-backend:
   stage: test
   image: node:20-alpine
@@ -40,13 +38,13 @@ test-recommendation:
     - pip install -r requirements.txt
     - pytest tests/ || true
 
-# ── Security ──────────────────────────────────────────
 trivy-scan:
   stage: security
-  image: aquasec/trivy:latest
+  image: python:3.11-slim
   script:
-    - trivy fs --severity HIGH,CRITICAL --exit-code 0 --no-progress .
-  allow_failure: false
+    - pip install trivy || true
+    - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+    - trivy filesystem --severity HIGH,CRITICAL --exit-code 0 --no-progress .
 
 secret-detection:
   stage: security
@@ -61,9 +59,7 @@ checkov-scan:
   script:
     - pip install checkov
     - checkov -d . --framework dockerfile --soft-fail
-  allow_failure: false
 
-# ── Build ──────────────────────────────────────────────
 build-backend:
   stage: build
   image: docker:24
@@ -71,7 +67,6 @@ build-backend:
     - docker:24-dind
   script:
     - docker build -t watchweave-backend:$CI_COMMIT_SHA ./backend
-    - echo "Backend image built successfully"
   only:
     - main
 
@@ -82,7 +77,6 @@ build-frontend:
     - docker:24-dind
   script:
     - docker build -t watchweave-frontend:$CI_COMMIT_SHA ./frontend
-    - echo "Frontend image built successfully"
   only:
     - main
 
@@ -93,11 +87,9 @@ build-recommendations:
     - docker:24-dind
   script:
     - docker build -t watchweave-recommendations:$CI_COMMIT_SHA ./recommendation-engine
-    - echo "Recommendations image built successfully"
   only:
     - main
 
-# ── Deploy ─────────────────────────────────────────────
 deploy-production:
   stage: deploy
   image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
