@@ -10,8 +10,15 @@ RUN npm run build
 
 FROM nginx:alpine
 
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
 COPY --from=build /app/build /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+RUN chown -R appuser:appgroup /usr/share/nginx/html
+
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD wget -qO- http://localhost:80 || exit 1
 
 EXPOSE 80
 
