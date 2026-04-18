@@ -45,8 +45,8 @@ trivy-scan:
   stage: security
   image: aquasec/trivy:latest
   script:
-    - trivy fs --severity HIGH,CRITICAL --exit-code 0 .
-  allow_failure: true
+    - trivy fs --severity HIGH,CRITICAL --exit-code 0 --no-progress .
+  allow_failure: false
 
 secret-detection:
   stage: security
@@ -54,14 +54,14 @@ secret-detection:
   script:
     - pip install detect-secrets
     - detect-secrets scan . || true
-  allow_failure: true
 
 checkov-scan:
   stage: security
-  image: bridgecrew/checkov:latest
+  image: python:3.11-slim
   script:
+    - pip install checkov
     - checkov -d . --framework dockerfile --soft-fail
-  allow_failure: true
+  allow_failure: false
 
 # ── Build ──────────────────────────────────────────────
 build-backend:
