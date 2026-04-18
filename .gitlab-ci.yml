@@ -40,10 +40,14 @@ test-recommendation:
 
 trivy-scan:
   stage: security
-  image: python:3.11-slim
+  image: ubuntu:22.04
   script:
-    - pip install trivy || true
-    - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+    - apt-get update -y
+    - apt-get install -y wget apt-transport-https gnupg
+    - wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | apt-key add -
+    - echo "deb https://aquasecurity.github.io/trivy-repo/deb jammy main" | tee /etc/apt/sources.list.d/trivy.list
+    - apt-get update -y
+    - apt-get install -y trivy
     - trivy filesystem --severity HIGH,CRITICAL --exit-code 0 --no-progress .
 
 secret-detection:
