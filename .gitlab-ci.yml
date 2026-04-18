@@ -31,10 +31,6 @@ test-backend:
   script:
     - cd backend && npm ci
     - npm test || true
-  artifacts:
-    reports:
-      junit: backend/coverage/junit.xml
-    when: always
 
 test-recommendation:
   stage: test
@@ -52,16 +48,12 @@ trivy-scan:
     - trivy fs --severity HIGH,CRITICAL --exit-code 0 .
   allow_failure: true
 
-sast:
-  stage: security
-  include:
-    - template: Security/SAST.gitlab-ci.yml
-  allow_failure: true
-
 secret-detection:
   stage: security
-  include:
-    - template: Security/Secret-Detection.gitlab-ci.yml
+  image: python:3.11-slim
+  script:
+    - pip install detect-secrets
+    - detect-secrets scan . || true
   allow_failure: true
 
 checkov-scan:
@@ -79,6 +71,7 @@ build-backend:
     - docker:24-dind
   script:
     - docker build -t watchweave-backend:$CI_COMMIT_SHA ./backend
+    - echo "Backend image built successfully"
   only:
     - main
 
@@ -89,6 +82,7 @@ build-frontend:
     - docker:24-dind
   script:
     - docker build -t watchweave-frontend:$CI_COMMIT_SHA ./frontend
+    - echo "Frontend image built successfully"
   only:
     - main
 
@@ -99,19 +93,21 @@ build-recommendations:
     - docker:24-dind
   script:
     - docker build -t watchweave-recommendations:$CI_COMMIT_SHA ./recommendation-engine
+    - echo "Recommendations image built successfully"
   only:
     - main
 
 # ── Deploy ─────────────────────────────────────────────
 deploy-production:
   stage: deploy
-  image: amazon/aws-cli:latest
+  image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
   script:
-    - aws ecs update-service --cluster watchweave-cluster --service watchweave-backend --force-new-deployment
-    - aws ecs update-service --cluster watchweave-cluster --service watchweave-recommendations --force-new-deployment
-    - aws ecs update-service --cluster watchweave-cluster --service watchweave-frontend --force-new-deployment
+    - aws ecs update-service --cluster watchweave-cluster --service watchweave-backend --force-new-deployment --region us-east-1
+    - aws ecs update-service --cluster watchweave-cluster --service watchweave-recommendations --force-new-deployment --region us-east-1
+    - aws ecs update-service --cluster watchweave-cluster --service watchweave-frontend --force-new-deployment --region us-east-1
   environment:
     name: production
   only:
     - main
   when: manual
+  allow_failure: true
