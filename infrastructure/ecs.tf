@@ -14,24 +14,24 @@ resource "aws_security_group" "ecs" {
   vpc_id = aws_vpc.main.id
 
   ingress {
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port       = 8080
+    to_port         = 8080
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
   }
 
   ingress {
-    from_port   = 3000
-    to_port     = 3000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port       = 3000
+    to_port         = 3000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
   }
 
   ingress {
-    from_port   = 5000
-    to_port     = 5000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port       = 5000
+    to_port         = 5000
+    protocol        = "tcp"
+    cidr_blocks     = ["0.0.0.0/0"]
   }
 
   egress {
@@ -111,6 +111,14 @@ resource "aws_ecs_service" "backend" {
     security_groups  = [aws_security_group.ecs.id]
     assign_public_ip = true
   }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.backend.arn
+    container_name   = "backend"
+    container_port   = 3000
+  }
+
+  depends_on = [aws_lb_listener.backend]
 }
 
 # Recommendation Engine Task Definition
@@ -195,4 +203,12 @@ resource "aws_ecs_service" "frontend" {
     security_groups  = [aws_security_group.ecs.id]
     assign_public_ip = true
   }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.frontend.arn
+    container_name   = "frontend"
+    container_port   = 8080
+  }
+
+  depends_on = [aws_lb_listener.frontend]
 }
