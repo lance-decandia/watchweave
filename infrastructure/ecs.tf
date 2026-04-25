@@ -171,7 +171,7 @@ resource "aws_ecs_task_definition" "frontend" {
   container_definitions = jsonencode([{
     name  = "frontend"
     image = "${aws_ecr_repository.frontend.repository_url}:latest"
-    portMappings = [{ containerPort = 80 }]
+    portMappings = [{ containerPort = 8080 }]
     logConfiguration = {
       logDriver = "awslogs"
       options = {
