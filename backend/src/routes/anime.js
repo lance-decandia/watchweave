@@ -22,7 +22,9 @@ async function setCache(key, value) {
       redisClient.setEx(key, CACHE_TTL, JSON.stringify(value)),
       new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000))
     ]);
-  } catch {}
+  } catch (err) {
+    // Redis write failed silently — cache is optional
+  }
 }
 
 router.get('/search', async (req, res) => {
