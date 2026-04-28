@@ -153,6 +153,7 @@ resource "aws_ecs_task_definition" "recommendations" {
   }])
 }
 
+# Recommendation Engine ECS Service
 resource "aws_ecs_service" "recommendations" {
   name            = "${var.project_name}-recommendations"
   cluster         = aws_ecs_cluster.main.id
@@ -165,6 +166,14 @@ resource "aws_ecs_service" "recommendations" {
     security_groups  = [aws_security_group.ecs.id]
     assign_public_ip = true
   }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.recommendations.arn
+    container_name   = "recommendations"
+    container_port   = 5000
+  }
+
+  depends_on = [aws_lb_listener.recommendations]
 }
 
 # Frontend Task Definition

@@ -27,6 +27,13 @@ resource "aws_security_group" "alb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    from_port   = 5000
+    to_port     = 5000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -69,6 +76,22 @@ resource "aws_lb_target_group" "backend" {
   }
 }
 
+# Target Group for Recommendation Engine
+resource "aws_lb_target_group" "recommendations" {
+  name        = "${var.project_name}-rec-tg"
+  port        = 5000
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.main.id
+  target_type = "ip"
+
+  health_check {
+    path                = "/health"
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
+    interval            = 30
+  }
+}
+
 # ALB Listener for Frontend (port 80)
 resource "aws_lb_listener" "frontend" {
   load_balancer_arn = aws_lb.main.arn
@@ -90,5 +113,17 @@ resource "aws_lb_listener" "backend" {
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.backend.arn
+  }
+}
+
+# ALB Listener for Recommendation Engine (port 5000)
+resource "aws_lb_listener" "recommendations" {
+  load_balancer_arn = aws_lb.main.arn
+  port              = 5000
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.recommendations.arn
   }
 }
