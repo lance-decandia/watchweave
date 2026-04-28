@@ -52,15 +52,28 @@ const Watchlist: React.FC = () => {
             {watchlist.map((entry) => (
               <Grid size={{ xs: 12, sm: 6, md: 4 }} key={entry.id}>
                 <Card
-                  sx={{ display: 'flex', cursor: 'pointer' }}
+                  sx={{ display: 'flex', flexDirection: 'column', cursor: 'pointer', height: '100%' }}
                   onClick={() => navigate(`/anime/${entry.anime_id}`)}
                 >
-                  <CardMedia component="img" sx={{ width: 100 }}
-                    image={entry.anime_image} alt={entry.anime_title} />
+                  <CardMedia component="img" height="160"
+                    image={entry.anime_image} alt={entry.anime_title}
+                    sx={{ objectFit: 'cover' }}
+                  />
                   <CardContent sx={{ flexGrow: 1 }}>
-                    <Typography variant="h6" noWrap>{entry.anime_title}</Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 'bold', flexGrow: 1, mr: 1 }}>
+                        {entry.anime_title}
+                      </Typography>
+                      <IconButton
+                        onClick={(e) => { e.stopPropagation(); removeEntry(entry.anime_id); }}
+                        color="error"
+                        size="small"
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
                     <Typography variant="body2">Episodes Watched:</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                       <input
                         type="number"
                         min={0}
@@ -72,7 +85,7 @@ const Watchlist: React.FC = () => {
                       />
                       <Typography variant="body2">/ {entry.total_episodes}</Typography>
                     </Box>
-                    <FormControl fullWidth size="small" sx={{ mt: 1 }}>
+                    <FormControl fullWidth size="small">
                       <InputLabel>Status</InputLabel>
                       <Select value={entry.status} label="Status"
                         onClick={(e) => e.stopPropagation()}
@@ -84,12 +97,6 @@ const Watchlist: React.FC = () => {
                       </Select>
                     </FormControl>
                   </CardContent>
-                  <IconButton
-                    onClick={(e) => { e.stopPropagation(); removeEntry(entry.anime_id); }}
-                    color="error"
-                  >
-                    <DeleteIcon />
-                  </IconButton>
                 </Card>
               </Grid>
             ))}
