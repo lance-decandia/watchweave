@@ -15,3 +15,5 @@ Anime tracking platform built with DevSecOps practices.
 - CI/CD: GitHub Actions + GitLab CI/CD
 - Infrastructure: AWS ECS, ECR, RDS, ElastiCache
 - Monitoring: Prometheus + Grafana
+# git-secrets
+This repo uses git-secrets to prevent committing AWS credentials and other secrets.
