@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Typography, Box, Grid, Card, CardMedia, CardContent, Chip, CircularProgress } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Recommendations: React.FC = () => {
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -36,7 +38,10 @@ const Recommendations: React.FC = () => {
           <Grid container spacing={3}>
             {recommendations.map((anime) => (
               <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={anime.mal_id}>
-                <Card>
+                <Card
+                  sx={{ cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column' }}
+                  onClick={() => navigate(`/anime/${anime.mal_id}`)}
+                >
                   <CardMedia component="img" height="250"
                     image={anime.images?.jpg?.image_url} alt={anime.title} />
                   <CardContent>

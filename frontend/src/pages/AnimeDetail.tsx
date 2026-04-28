@@ -12,6 +12,8 @@ const AnimeDetail: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const [anime, setAnime] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [inWatchlist, setInWatchlist] = useState(false);
+  const [added, setAdded] = useState(false);
 
   useEffect(() => {
     const fetchAnime = async () => {
@@ -27,6 +29,21 @@ const AnimeDetail: React.FC = () => {
     fetchAnime();
   }, [id]);
 
+  useEffect(() => {
+    const checkWatchlist = async () => {
+      if (!isAuthenticated) return;
+      try {
+        const res = await watchlistService.getAll();
+        const watchlist = res.data;
+        const alreadyAdded = watchlist.some((entry: any) => entry.anime_id === Number(id));
+        setInWatchlist(alreadyAdded);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    checkWatchlist();
+  }, [id, isAuthenticated]);
+
   const addToWatchlist = async () => {
     if (!isAuthenticated) {
       navigate('/login');
@@ -41,7 +58,8 @@ const AnimeDetail: React.FC = () => {
         episodes_watched: 0,
         total_episodes: anime.episodes || 0,
       });
-      alert(`${anime.title} added to watchlist!`);
+      setInWatchlist(true);
+      setAdded(true);
     } catch (err) {
       console.error(err);
     }
@@ -90,9 +108,19 @@ const AnimeDetail: React.FC = () => {
           <Typography variant="body1" sx={{ mb: 3 }}>
             {anime.synopsis || 'No description available.'}
           </Typography>
-          <Button variant="contained" color="secondary" onClick={addToWatchlist}>
-            {isAuthenticated ? 'Add to Watchlist' : 'Login to Add to Watchlist'}
-          </Button>
+          {!isAuthenticated ? (
+            <Button variant="contained" color="secondary" onClick={() => navigate('/login')}>
+              Login to Add to Watchlist
+            </Button>
+          ) : inWatchlist ? (
+            <Button variant="contained" disabled sx={{ backgroundColor: 'grey.400' }}>
+              {added ? '✓ Added to Watchlist' : '✓ Already in Watchlist'}
+            </Button>
+          ) : (
+            <Button variant="contained" color="secondary" onClick={addToWatchlist}>
+              Add to Watchlist
+            </Button>
+          )}
         </Grid>
       </Grid>
     </Container>
