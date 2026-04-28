@@ -54,9 +54,18 @@ const Watchlist: React.FC = () => {
                     image={entry.anime_image} alt={entry.anime_title} />
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Typography variant="h6" noWrap>{entry.anime_title}</Typography>
-                    <Typography variant="body2">
-                      {entry.episodes_watched}/{entry.total_episodes} episodes
-                    </Typography>
+                    <Typography variant="body2">Episodes Watched:</Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <input
+                          type="number"
+                          min={0}
+                          max={entry.total_episodes}
+                          value={entry.episodes_watched}
+                          onChange={(e) => updateStatus(entry.anime_id, entry.status, Number(e.target.value))}
+                          style={{ width: 60, padding: '4px', borderRadius: 4, border: '1px solid #ccc' }}
+                        />
+                        <Typography variant="body2">/ {entry.total_episodes}</Typography>
+                      </Box>
                     <FormControl fullWidth size="small" sx={{ mt: 1 }}>
                       <InputLabel>Status</InputLabel>
                       <Select value={entry.status} label="Status"
