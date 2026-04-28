@@ -8,6 +8,7 @@ import Register from './pages/Register';
 import Search from './pages/Search';
 import Watchlist from './pages/Watchlist';
 import Recommendations from './pages/Recommendations';
+import AnimeDetail from './pages/AnimeDetail';
 
 const theme = createTheme({
   palette: {
@@ -31,6 +32,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Search />} />
             <Route path="/search" element={<Search />} />
+            <Route path="/anime/:id" element={<AnimeDetail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/watchlist" element={

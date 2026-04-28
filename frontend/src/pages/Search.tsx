@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Box, TextField, Button, Grid, Card, CardMedia,
   CardContent, Typography, CardActions, Chip } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { animeService, watchlistService } from '../services/api';
 import { Anime } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -10,6 +11,7 @@ const Search: React.FC = () => {
   const [results, setResults] = useState<Anime[]>([]);
   const [loading, setLoading] = useState(false);
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +27,12 @@ const Search: React.FC = () => {
     }
   };
 
-  const addToWatchlist = async (anime: Anime) => {
+  const addToWatchlist = async (e: React.MouseEvent, anime: Anime) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
     try {
       await watchlistService.add({
         anime_id: anime.mal_id,
@@ -55,7 +62,10 @@ const Search: React.FC = () => {
         <Grid container spacing={3}>
           {results.map((anime) => (
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={anime.mal_id}>
-              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <Card
+                sx={{ height: '100%', display: 'flex', flexDirection: 'column', cursor: 'pointer' }}
+                onClick={() => navigate(`/anime/${anime.mal_id}`)}
+              >
                 <CardMedia component="img" height="250"
                   image={anime.images.jpg.image_url} alt={anime.title} />
                 <CardContent sx={{ flexGrow: 1 }}>
@@ -69,13 +79,11 @@ const Search: React.FC = () => {
                     ))}
                   </Box>
                 </CardContent>
-                {isAuthenticated && (
-                  <CardActions>
-                    <Button size="small" onClick={() => addToWatchlist(anime)}>
-                      Add to Watchlist
-                    </Button>
-                  </CardActions>
-                )}
+                <CardActions>
+                  <Button size="small" onClick={(e) => addToWatchlist(e, anime)}>
+                    {isAuthenticated ? 'Add to Watchlist' : 'Login to Add'}
+                  </Button>
+                </CardActions>
               </Card>
             </Grid>
           ))}

@@ -1,0 +1,102 @@
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import {
+  Container, Box, Typography, Button, Chip, CircularProgress, Grid
+} from '@mui/material';
+import { animeService, watchlistService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+
+const AnimeDetail: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  const [anime, setAnime] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAnime = async () => {
+      try {
+        const res = await animeService.getById(id!);
+        setAnime(res.data.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAnime();
+  }, [id]);
+
+  const addToWatchlist = async () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    try {
+      await watchlistService.add({
+        anime_id: anime.mal_id,
+        anime_title: anime.title,
+        anime_image: anime.images.jpg.image_url,
+        status: 'plan_to_watch',
+        episodes_watched: 0,
+        total_episodes: anime.episodes || 0,
+      });
+      alert(`${anime.title} added to watchlist!`);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  if (loading) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
+      <CircularProgress />
+    </Box>
+  );
+
+  if (!anime) return (
+    <Container sx={{ mt: 4 }}>
+      <Typography>Anime not found.</Typography>
+    </Container>
+  );
+
+  return (
+    <Container maxWidth="lg" sx={{ mt: 4 }}>
+      <Button onClick={() => navigate(-1)} sx={{ mb: 2 }}>← Back</Button>
+      <Grid container spacing={4}>
+        <Grid item xs={12} md={4}>
+          <img
+            src={anime.images.jpg.large_image_url || anime.images.jpg.image_url}
+            alt={anime.title}
+            style={{ width: '100%', borderRadius: 8 }}
+          />
+        </Grid>
+        <Grid item xs={12} md={8}>
+          <Typography variant="h4" gutterBottom>{anime.title}</Typography>
+          <Typography variant="body2" color="text.secondary" gutterBottom>
+            {anime.title_english && anime.title_english !== anime.title
+              ? `English: ${anime.title_english}` : ''}
+          </Typography>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body1"><strong>Score:</strong> {anime.score || 'N/A'}</Typography>
+            <Typography variant="body1"><strong>Episodes:</strong> {anime.episodes || 'N/A'}</Typography>
+            <Typography variant="body1"><strong>Status:</strong> {anime.status || 'N/A'}</Typography>
+            <Typography variant="body1"><strong>Rating:</strong> {anime.rating || 'N/A'}</Typography>
+          </Box>
+          <Box sx={{ mb: 2 }}>
+            {anime.genres?.map((g: any) => (
+              <Chip key={g.name} label={g.name} size="small" sx={{ mr: 0.5, mb: 0.5 }} />
+            ))}
+          </Box>
+          <Typography variant="body1" sx={{ mb: 3 }}>
+            {anime.synopsis || 'No description available.'}
+          </Typography>
+          <Button variant="contained" color="secondary" onClick={addToWatchlist}>
+            {isAuthenticated ? 'Add to Watchlist' : 'Login to Add to Watchlist'}
+          </Button>
+        </Grid>
+      </Grid>
+    </Container>
+  );
+};
+
+export default AnimeDetail;
