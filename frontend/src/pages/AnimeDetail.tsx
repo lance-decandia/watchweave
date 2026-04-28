@@ -63,14 +63,14 @@ const AnimeDetail: React.FC = () => {
     <Container maxWidth="lg" sx={{ mt: 4 }}>
       <Button onClick={() => navigate(-1)} sx={{ mb: 2 }}>← Back</Button>
       <Grid container spacing={4}>
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <img
             src={anime.images.jpg.large_image_url || anime.images.jpg.image_url}
             alt={anime.title}
             style={{ width: '100%', borderRadius: 8 }}
           />
         </Grid>
-        <Grid item xs={12} md={8}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Typography variant="h4" gutterBottom>{anime.title}</Typography>
           <Typography variant="body2" color="text.secondary" gutterBottom>
             {anime.title_english && anime.title_english !== anime.title
