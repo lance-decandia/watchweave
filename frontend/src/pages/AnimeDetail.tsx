@@ -16,7 +16,7 @@ const AnimeDetail: React.FC = () => {
   useEffect(() => {
     const fetchAnime = async () => {
       try {
-        const res = await animeService.getById(id!);
+        const res = await animeService.getById(Number(id!));
         setAnime(res.data.data);
       } catch (err) {
         console.error(err);
