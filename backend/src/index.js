@@ -13,21 +13,15 @@ const initDB = require('./config/init-db');
 
 const app = express();
 
-// Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: [
-    'http://watchweave-alb-2123412938.us-east-1.elb.amazonaws.com',
-    'http://localhost',
-    'http://localhost:3000',
-    'http://localhost:8080',
-  ],
-  credentials: true
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(morgan('combined'));
 app.use(express.json());
 
-// Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
