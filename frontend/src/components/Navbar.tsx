@@ -15,10 +15,18 @@ const Navbar: React.FC = () => {
   return (
     <AppBar position="static">
       <Toolbar>
-        <Typography variant="h6" sx={{ flexGrow: 1, cursor: 'pointer' }}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1, cursor: 'pointer' }}
           onClick={() => navigate('/')}>
-          🎬 WatchWeave
-        </Typography>
+          <Box sx={{
+            width: 32, height: 32, borderRadius: '8px',
+            background: 'linear-gradient(135deg, #7B2FBE, #9C27B0)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: 'bold', fontSize: '18px', color: 'white', fontFamily: 'Georgia, serif'
+          }}>
+            W
+          </Box>
+          <Typography variant="h6">WatchWeave</Typography>
+        </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button color="inherit" onClick={() => navigate('/search')}>Search</Button>
           {isAuthenticated ? (
