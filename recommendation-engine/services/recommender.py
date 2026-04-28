@@ -6,6 +6,20 @@ from collections import Counter
 
 JIKAN_BASE = 'https://api.jikan.moe/v4'
 
+# MAL genre ID mapping
+GENRE_IDS = {
+    'Action': 1, 'Adventure': 2, 'Cars': 3, 'Comedy': 4, 'Dementia': 5,
+    'Demons': 6, 'Mystery': 7, 'Drama': 8, 'Ecchi': 9, 'Fantasy': 10,
+    'Game': 11, 'Hentai': 12, 'Historical': 13, 'Horror': 14, 'Kids': 15,
+    'Magic': 16, 'Martial Arts': 17, 'Mecha': 18, 'Music': 19, 'Parody': 20,
+    'Samurai': 21, 'Romance': 22, 'School': 23, 'Sci-Fi': 24, 'Shoujo': 25,
+    'Shoujo Ai': 26, 'Shounen': 27, 'Shounen Ai': 28, 'Space': 29,
+    'Sports': 30, 'Super Power': 31, 'Vampire': 32, 'Yaoi': 33, 'Yuri': 34,
+    'Harem': 35, 'Slice of Life': 36, 'Supernatural': 37, 'Military': 38,
+    'Police': 39, 'Psychological': 40, 'Thriller': 41, 'Seinen': 42,
+    'Josei': 43, 'Award Winning': 46, 'Suspense': 41
+}
+
 def get_db_connection():
     return psycopg2.connect(
         host=os.getenv('DB_HOST', 'localhost'),
@@ -80,7 +94,6 @@ def get_recommendations(user_id, limit=12):
         print("No genre vector, falling back to top anime", flush=True)
         try:
             res = requests.get(f'{JIKAN_BASE}/top/anime', timeout=10)
-            print(f"Top anime response: {res.status_code}", flush=True)
             if res.status_code == 200:
                 return res.json().get('data', [])[:limit]
         except Exception as e:
@@ -91,13 +104,20 @@ def get_recommendations(user_id, limit=12):
     candidates = []
 
     for genre_name, _ in top_genres:
+        genre_id = GENRE_IDS.get(genre_name)
+        if not genre_id:
+            print(f"No ID found for genre {genre_name}", flush=True)
+            continue
         try:
             res = requests.get(f'{JIKAN_BASE}/anime',
-                params={'genres': genre_name, 'order_by': 'score', 'sort': 'desc', 'limit': 10},
+                params={'genres': genre_id, 'order_by': 'score', 'sort': 'desc', 'limit': 10},
                 timeout=10)
             if res.status_code == 200:
-                candidates.extend(res.json().get('data', []))
-                print(f"Got {len(res.json().get('data', []))} candidates for genre {genre_name}", flush=True)
+                data = res.json().get('data', [])
+                candidates.extend(data)
+                print(f"Got {len(data)} candidates for genre {genre_name} (id={genre_id})", flush=True)
+            else:
+                print(f"Jikan genre search returned {res.status_code} for {genre_name}", flush=True)
         except Exception as e:
             print(f"Genre search error for {genre_name}: {e}", flush=True)
             continue
