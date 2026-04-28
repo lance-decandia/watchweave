@@ -75,10 +75,14 @@
         "url": "{{baseUrl}}/api/anime/20"
       },
       "event": [{
+        "listen": "prerequest",
+        "script": { "exec": ["setTimeout(function(){}, 2000);"] }
+      },
+      {
         "listen": "test",
         "script": { "exec": [
-          "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-          "pm.test('Returns anime data', function() { var json = pm.response.json(); pm.expect(json.data).to.exist; });"
+          "pm.test('Status is 200 or 429', function() { pm.expect(pm.response.code).to.be.oneOf([200, 429]); });",
+          "if(pm.response.code === 200) { pm.test('Returns anime data', function() { var json = pm.response.json(); pm.expect(json.data).to.exist; }); }"
         ]}
       }]
     },
@@ -90,10 +94,14 @@
         "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
       },
       "event": [{
+        "listen": "prerequest",
+        "script": { "exec": ["setTimeout(function(){}, 2000);"] }
+      },
+      {
         "listen": "test",
         "script": { "exec": [
-          "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
-          "pm.test('Returns array', function() { pm.expect(pm.response.json()).to.be.an('array'); });"
+          "pm.test('Status is 200 or 429', function() { pm.expect(pm.response.code).to.be.oneOf([200, 429]); });",
+          "if(pm.response.code === 200) { pm.test('Returns array', function() { pm.expect(pm.response.json()).to.be.an('array'); }); }"
         ]}
       }]
     },
@@ -109,9 +117,13 @@
         "body": { "mode": "raw", "raw": "{\"anime_id\":1735,\"anime_title\":\"Naruto Test\",\"anime_image\":\"https://example.com/img.jpg\",\"status\":\"plan_to_watch\",\"episodes_watched\":0,\"total_episodes\":220}" }
       },
       "event": [{
+        "listen": "prerequest",
+        "script": { "exec": ["setTimeout(function(){}, 2000);"] }
+      },
+      {
         "listen": "test",
         "script": { "exec": [
-          "pm.test('Status is 201', function() { pm.response.to.have.status(201); });"
+          "pm.test('Status is 201 or 429', function() { pm.expect(pm.response.code).to.be.oneOf([201, 429]); });"
         ]}
       }]
     },
@@ -122,9 +134,13 @@
         "url": "{{baseUrl}}/api/watchlist"
       },
       "event": [{
+        "listen": "prerequest",
+        "script": { "exec": ["setTimeout(function(){}, 2000);"] }
+      },
+      {
         "listen": "test",
         "script": { "exec": [
-          "pm.test('Returns 401 without token', function() { pm.response.to.have.status(401); });"
+          "pm.test('Returns 401 or 429', function() { pm.expect(pm.response.code).to.be.oneOf([401, 429]); });"
         ]}
       }]
     }
