@@ -97,7 +97,7 @@ const Search: React.FC = () => {
                 <CardActions>
                   {watchlistIds.has(anime.mal_id) ? (
                     <Button size="small" disabled sx={{ color: 'grey.500' }}>
-                      ✓ Already in Watchlist
+                      Already in Watchlist
                     </Button>
                   ) : (
                     <Button size="small" onClick={(e) => addToWatchlist(e, anime)}>

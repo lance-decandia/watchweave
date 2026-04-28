@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Typography, Box, Grid, Card, CardMedia, CardContent, Chip, CircularProgress } from '@mui/material';
+import { Container, Typography, Box, Grid, Card, CardMedia, CardContent,
+  CardActions, Chip, CircularProgress, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { watchlistService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const Recommendations: React.FC = () => {
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [watchlistIds, setWatchlistIds] = useState<Set<number>>(new Set());
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -26,6 +31,37 @@ const Recommendations: React.FC = () => {
     fetchRecommendations();
   }, []);
 
+  useEffect(() => {
+    const fetchWatchlist = async () => {
+      if (!isAuthenticated) return;
+      try {
+        const res = await watchlistService.getAll();
+        const ids = new Set<number>(res.data.map((entry: any) => entry.anime_id));
+        setWatchlistIds(ids);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchWatchlist();
+  }, [isAuthenticated]);
+
+  const addToWatchlist = async (e: React.MouseEvent, anime: any) => {
+    e.stopPropagation();
+    try {
+      await watchlistService.add({
+        anime_id: anime.mal_id,
+        anime_title: anime.title,
+        anime_image: anime.images?.jpg?.image_url,
+        status: 'plan_to_watch',
+        episodes_watched: 0,
+        total_episodes: anime.episodes || 0,
+      });
+      setWatchlistIds(prev => new Set(prev).add(anime.mal_id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <Container maxWidth="lg">
       <Box sx={{ mt: 4 }}>
@@ -44,7 +80,7 @@ const Recommendations: React.FC = () => {
                 >
                   <CardMedia component="img" height="250"
                     image={anime.images?.jpg?.image_url} alt={anime.title} />
-                  <CardContent>
+                  <CardContent sx={{ flexGrow: 1 }}>
                     <Typography variant="h6" noWrap>{anime.title}</Typography>
                     <Typography variant="body2">Score: {anime.score}</Typography>
                     <Box sx={{ mt: 1 }}>
@@ -53,6 +89,17 @@ const Recommendations: React.FC = () => {
                       ))}
                     </Box>
                   </CardContent>
+                  <CardActions>
+                    {watchlistIds.has(anime.mal_id) ? (
+                      <Button size="small" disabled>
+                        Already in Watchlist
+                      </Button>
+                    ) : (
+                      <Button size="small" onClick={(e) => addToWatchlist(e, anime)}>
+                        Add to Watchlist
+                      </Button>
+                    )}
+                  </CardActions>
                 </Card>
               </Grid>
             ))}

@@ -113,8 +113,8 @@ const AnimeDetail: React.FC = () => {
               Login to Add to Watchlist
             </Button>
           ) : inWatchlist ? (
-            <Button variant="contained" disabled sx={{ backgroundColor: 'grey.400' }}>
-              {added ? '✓ Added to Watchlist' : '✓ Already in Watchlist'}
+            <Button variant="contained" disabled>
+              {added ? 'Added to Watchlist' : 'Already in Watchlist'}
             </Button>
           ) : (
             <Button variant="contained" color="secondary" onClick={addToWatchlist}>
