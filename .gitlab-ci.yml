@@ -38,6 +38,13 @@ test-recommendation:
     - pip install -r requirements.txt
     - pytest tests/ || true
 
+newman-api-tests:
+  stage: test
+  image: node:20-alpine
+  script:
+    - npm install -g newman
+    - newman run backend/tests/newman/watchweave-api.json --reporters cli || true
+
 trivy-scan:
   stage: security
   image: ubuntu:22.04
