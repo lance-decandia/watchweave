@@ -8,6 +8,7 @@ import Register from './pages/Register';
 import Search from './pages/Search';
 import Watchlist from './pages/Watchlist';
 import Recommendations from './pages/Recommendations';
+import Home from './pages/Home';
 import AnimeDetail from './pages/AnimeDetail';
 
 const theme = createTheme({
@@ -30,7 +31,7 @@ function App() {
         <Router>
           <Navbar />
           <Routes>
-            <Route path="/" element={<Search />} />
+            <Route path="/" element={<Home />} />
             <Route path="/search" element={<Search />} />
             <Route path="/anime/:id" element={<AnimeDetail />} />
             <Route path="/login" element={<Login />} />
