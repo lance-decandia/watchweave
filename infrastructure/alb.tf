@@ -21,6 +21,13 @@ resource "aws_security_group" "alb" {
   }
 
   ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
     from_port   = 3000
     to_port     = 3000
     protocol    = "tcp"
@@ -28,8 +35,22 @@ resource "aws_security_group" "alb" {
   }
 
   ingress {
+    from_port   = 3443
+    to_port     = 3443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
     from_port   = 5000
     to_port     = 5000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 5443
+    to_port     = 5443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -92,11 +113,29 @@ resource "aws_lb_target_group" "recommendations" {
   }
 }
 
-# ALB Listener for Frontend (port 80)
-resource "aws_lb_listener" "frontend" {
+# HTTP to HTTPS redirect (port 80)
+resource "aws_lb_listener" "http_redirect" {
   load_balancer_arn = aws_lb.main.arn
   port              = 80
   protocol          = "HTTP"
+
+  default_action {
+    type = "redirect"
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+}
+
+# HTTPS Listener for Frontend (port 443)
+resource "aws_lb_listener" "https" {
+  load_balancer_arn = aws_lb.main.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  certificate_arn   = "arn:aws:acm:us-east-1:872253065579:certificate/7423f3f4-a624-4db2-b511-2525d237a894"
 
   default_action {
     type             = "forward"
@@ -104,7 +143,7 @@ resource "aws_lb_listener" "frontend" {
   }
 }
 
-# ALB Listener for Backend (port 3000)
+# HTTP Listener for Backend (port 3000)
 resource "aws_lb_listener" "backend" {
   load_balancer_arn = aws_lb.main.arn
   port              = 3000
@@ -116,11 +155,39 @@ resource "aws_lb_listener" "backend" {
   }
 }
 
-# ALB Listener for Recommendation Engine (port 5000)
+# HTTPS Listener for Backend (port 3443)
+resource "aws_lb_listener" "backend_https" {
+  load_balancer_arn = aws_lb.main.arn
+  port              = 3443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  certificate_arn   = "arn:aws:acm:us-east-1:872253065579:certificate/7423f3f4-a624-4db2-b511-2525d237a894"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.backend.arn
+  }
+}
+
+# HTTP Listener for Recommendation Engine (port 5000)
 resource "aws_lb_listener" "recommendations" {
   load_balancer_arn = aws_lb.main.arn
   port              = 5000
   protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.recommendations.arn
+  }
+}
+
+# HTTPS Listener for Recommendation Engine (port 5443)
+resource "aws_lb_listener" "recommendations_https" {
+  load_balancer_arn = aws_lb.main.arn
+  port              = 5443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  certificate_arn   = "arn:aws:acm:us-east-1:872253065579:certificate/7423f3f4-a624-4db2-b511-2525d237a894"
 
   default_action {
     type             = "forward"
