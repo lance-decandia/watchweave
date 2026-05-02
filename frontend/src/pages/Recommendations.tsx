@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Typography, Box, Grid, Card, CardMedia, CardContent,
-  CardActions, Chip, CircularProgress, Button } from '@mui/material';
+  CardActions, Chip, Button, Skeleton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { watchlistService } from '../services/api';
@@ -62,12 +62,35 @@ const Recommendations: React.FC = () => {
     }
   };
 
+  const SkeletonCard = () => (
+    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Skeleton variant="rectangular" height={250} />
+      <CardContent sx={{ flexGrow: 1 }}>
+        <Skeleton variant="text" width="80%" />
+        <Skeleton variant="text" width="40%" />
+        <Box sx={{ mt: 1, display: 'flex', gap: 0.5 }}>
+          <Skeleton variant="rounded" width={60} height={24} />
+          <Skeleton variant="rounded" width={60} height={24} />
+        </Box>
+      </CardContent>
+      <CardActions>
+        <Skeleton variant="text" width={100} />
+      </CardActions>
+    </Card>
+  );
+
   return (
     <Container maxWidth="lg">
       <Box sx={{ mt: 4 }}>
         <Typography variant="h4" gutterBottom>Recommended For You</Typography>
         {loading ? (
-          <CircularProgress />
+          <Grid container spacing={3}>
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={i}>
+                <SkeletonCard />
+              </Grid>
+            ))}
+          </Grid>
         ) : recommendations.length === 0 ? (
           <Typography>Add some anime to your watchlist to get recommendations!</Typography>
         ) : (
