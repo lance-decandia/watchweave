@@ -123,6 +123,29 @@ const AnimeDetail: React.FC = () => {
           )}
         </Grid>
       </Grid>
+
+      {/* Trailer Section */}
+      {anime.trailer?.embed_url && (
+        <Box sx={{ mt: 6 }}>
+          <Typography variant="h5" gutterBottom>Trailer</Typography>
+          <Box sx={{ position: 'relative', paddingTop: '56.25%', borderRadius: 2, overflow: 'hidden' }}>
+            <iframe
+              src={anime.trailer.embed_url}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                border: 'none'
+              }}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              title={`${anime.title} Trailer`}
+            />
+          </Box>
+        </Box>
+      )}
     </Container>
   );
 };
