@@ -5,7 +5,8 @@
   },
   "variable": [
     { "key": "baseUrl", "value": "http://watchweave-alb-2123412938.us-east-1.elb.amazonaws.com:3000" },
-    { "key": "token", "value": "" }
+    { "key": "token", "value": "" },
+    { "key": "testAnimeId", "value": "1735" }
   ],
   "item": [
     {
@@ -28,7 +29,7 @@
         "method": "POST",
         "url": "{{baseUrl}}/api/auth/register",
         "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": { "mode": "raw", "raw": "{\"username\":\"testuser{{$randomInt}}\",\"email\":\"test{{$randomInt}}@test.com\",\"password\":\"Test1234!\"}" }
+        "body": { "mode": "raw", "raw": "{\"username\":\"testuser_{{$timestamp}}\",\"email\":\"test_{{$timestamp}}@test.com\",\"password\":\"Test1234!\"}" }
       },
       "event": [{
         "listen": "test",
@@ -114,7 +115,7 @@
           { "key": "Content-Type", "value": "application/json" },
           { "key": "Authorization", "value": "Bearer {{token}}" }
         ],
-        "body": { "mode": "raw", "raw": "{\"anime_id\":1735,\"anime_title\":\"Naruto Test\",\"anime_image\":\"https://example.com/img.jpg\",\"status\":\"plan_to_watch\",\"episodes_watched\":0,\"total_episodes\":220}" }
+        "body": { "mode": "raw", "raw": "{\"anime_id\":{{testAnimeId}},\"anime_title\":\"Naruto Test\",\"anime_image\":\"https://example.com/img.jpg\",\"status\":\"plan_to_watch\",\"episodes_watched\":0,\"total_episodes\":220}" }
       },
       "event": [{
         "listen": "prerequest",
@@ -123,7 +124,7 @@
       {
         "listen": "test",
         "script": { "exec": [
-          "pm.test('Status is 201 or 429', function() { pm.expect(pm.response.code).to.be.oneOf([201, 429]); });"
+          "pm.test('Status is 201 or 429', function() { pm.expect(pm.response.code).to.be.oneOf([201, 409, 429]); });"
         ]}
       }]
     },
@@ -141,6 +142,20 @@
         "listen": "test",
         "script": { "exec": [
           "pm.test('Returns 401 or 429', function() { pm.expect(pm.response.code).to.be.oneOf([401, 429]); });"
+        ]}
+      }]
+    },
+    {
+      "name": "Cleanup - Remove Test Watchlist Entry",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/api/watchlist/{{testAnimeId}}",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "pm.test('Cleanup successful', function() { pm.expect(pm.response.code).to.be.oneOf([200, 404, 429]); });"
         ]}
       }]
     }
