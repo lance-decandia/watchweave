@@ -9,6 +9,7 @@ import Search from './pages/Search';
 import Watchlist from './pages/Watchlist';
 import Recommendations from './pages/Recommendations';
 import Home from './pages/Home';
+import NotFound from './pages/NotFound';
 import AnimeDetail from './pages/AnimeDetail';
 
 const theme = createTheme({
@@ -42,6 +43,7 @@ function App() {
             <Route path="/recommendations" element={
               <PrivateRoute><Recommendations /></PrivateRoute>
             } />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Router>
       </AuthProvider>
