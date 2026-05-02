@@ -8,7 +8,7 @@ RUN npm ci --legacy-peer-deps
 COPY . .
 RUN npm run build
 
-FROM nginx:1.27-alpine
+FROM nginx:alpine
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
