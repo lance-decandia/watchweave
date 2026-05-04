@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_talisman import Talisman
+from prometheus_flask_exporter import PrometheusMetrics
 from dotenv import load_dotenv
 import os
 
@@ -8,6 +9,9 @@ load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
+
+# Prometheus metrics
+metrics = PrometheusMetrics(app)
 
 # Security headers
 Talisman(app,
