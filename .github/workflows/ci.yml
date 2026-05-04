@@ -216,4 +216,4 @@ jobs:
         with:
           target: 'https://watchweave.watch'
           allow_issue_writing: false
-          cmd_options: '-a'
+
